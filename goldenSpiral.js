@@ -52,8 +52,8 @@ function createSpiralMesh(scene) {
         // Translate by previous number
         mesh.position.x = fibVal * idx;
         mesh.position.y = 0;
-        mesh.rotation.x = 0.5;
-        mesh.rotation.y = 0.5;
+        // mesh.rotation.x = 0.5;
+        // mesh.rotation.y = 0.5;
         scene.add(mesh);
     }
 }

@@ -1,15 +1,13 @@
 :root {
     --bg-color: #060E0E;
     --cta-color: #BFDBF7;
-    --cta-secondary: #1F7A8C;
-    --accent: #E1E5F2;
     --golden: #F4E04D;
 }
 
 body {
     font-family: monospace;
     background: var(--bg-color);
-    padding: 24px;
+    padding: 8px;
 }
 
 .page-title {
@@ -44,5 +42,4 @@ body {
 
 .spiral {
     width: 100%;
-    height: 400px;
 }
