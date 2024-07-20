@@ -2,16 +2,24 @@
 <html>
 
 <head>
+    <link rel="stylesheet" href="main.css">
     <script src="goldenSpiral.js" type="module"></script>
 </head>
 
 <body>
-    <h1>The Golden Spiral in 3D</h1>
-    <button onclick="smaller()">Smaller</button>
-    <button onclick="bigger()">Bigger</button>
-    <span id="fib_val"></span>
+    <h1 class="page-title">The <span class="golden">Golden</span> Spiral in 3D</h1>
+    <div class="buttons-container">
+        <button class="button" onclick="smaller()">Smaller</button>
+        <span class="fib-val">
+            #
+            <span id="fib_val"></span>
+        </span>
+        <button class="button" onclick="bigger()">Bigger</button>
+    </div>
 
-    <canvas id="c"></canvas>
+    <div class="canvas-container">
+        <canvas id="c" class="spiral"></canvas>
+    </div>
 </body>
 
 </html>

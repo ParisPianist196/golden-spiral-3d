@@ -1,0 +1,48 @@
+:root {
+    --bg-color: #060E0E;
+    --cta-color: #BFDBF7;
+    --cta-secondary: #1F7A8C;
+    --accent: #E1E5F2;
+    --golden: #F4E04D;
+}
+
+body {
+    font-family: monospace;
+    background: var(--bg-color);
+    padding: 24px;
+}
+
+.page-title {
+    color: var(--cta-color);
+}
+
+.golden {
+    color: var(--golden);
+}
+
+.buttons-container {
+    display: flex;
+    align-items: center;
+}
+
+.button {
+    font-family: monospace;
+    padding: 4px 8px 4px 8px;
+    background-color: var(--cta-color);
+    color: var(--bg-color);
+    border-radius: 4px;
+    border: 0;
+}
+
+.fib-val {
+    background-color: var(--golden);
+    color: var(--bg-color);
+    padding: 4px 8px 4px 8px;
+    margin: 0 12px 0 12px;
+    border-radius: 4px;
+}
+
+.spiral {
+    width: 100%;
+    height: 400px;
+}

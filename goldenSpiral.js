@@ -1,5 +1,9 @@
 import * as THREE from './lib/three.module.min.js';
 
+// Colors
+const canvasBg = "#060E0E";
+const lineColor = "#BFDBF7";
+
 // Camera consts
 const fov = 40;
 const aspect = 2; // the canvas default
@@ -10,55 +14,66 @@ const camera_z = 120;
 // Lighting consts
 const color = 0xFFFFFF;
 const intensity = 3;
-let prevNum = 1;
-let curNum = 1;
+
+// Fibonacci
+let sequence = [0, 1];
+
+function getCheckedLen() {
+    let len = sequence.length;
+    return len < 3 ? 3 : len;
+}
 
 function bigger() {
-    let nextNum = curNum + prevNum;
-    prevNum = curNum;
-    curNum = nextNum;
-    updateHtmlVal(curNum);
-    renderSpiral(curNum);
+    let len = sequence.length;
+    sequence.push(sequence[len - 2] + sequence[len - 1]);
+    updateVal(sequence[len - 1]);
+    renderSpiral()
 }
 
 function smaller() {
-    let prevPrevNum = curNum - prevNum;
-    curNum = prevNum;
-    prevNum = prevPrevNum;
-    updateHtmlVal(curNum);
-    renderSpiral(curNum);
+    let len = getCheckedLen();
+    sequence.splice(len - 1, 1);
+    updateVal(sequence[len - 2]);
+    renderSpiral()
 }
 
-function updateHtmlVal(val) {
+function updateVal(val) {
     document.getElementById("fib_val").innerText = val;
 }
 
-function renderSpiral(fibVal) {
-    console.log(fibVal);
-    let objects = [];
+function createSpiralMesh(scene) {
+    for (const [idx, fibVal] of sequence.entries()) {
+        const w = fibVal;
 
+        const geometry = new THREE.EdgesGeometry(new THREE.BoxGeometry(w, w, w), 15)
+        const material = new THREE.LineBasicMaterial({ color: lineColor });
+        const mesh = new THREE.LineSegments(geometry, material);
+
+        // Translate by previous number
+        mesh.position.x = fibVal * idx;
+        mesh.position.y = 0;
+        mesh.rotation.x = 0.5;
+        mesh.rotation.y = 0.5;
+        scene.add(mesh);
+    }
+}
+
+function renderSpiral() {
     const canvas = document.querySelector('#c');
     const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
 
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
     camera.position.z = camera_z;
 
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xAAAAAA);
-
     const light = new THREE.DirectionalLight(color, intensity);
     light.position.set(-1, 2, 4);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(canvasBg);
+    scene.add(camera);
     scene.add(light);
 
-    const w = 40;
-    const geometry = new THREE.EdgesGeometry(new THREE.BoxGeometry(w, w, w), 15)
-    const material = new THREE.LineBasicMaterial({ color: 0x000000 });
-    const mesh = new THREE.LineSegments(geometry, material);
-    mesh.position.x = 0;
-    mesh.position.y = 0;
-
-    scene.add(mesh);
-    objects.push(mesh);
+    let objects = createSpiralMesh(scene);
 
     function resizeRendererToDisplaySize() {
         const canvas = renderer.domElement;
@@ -81,12 +96,12 @@ function renderSpiral(fibVal) {
             camera.updateProjectionMatrix();
         }
 
-        objects.forEach((obj, ndx) => {
-            const speed = .1 + ndx * .05;
-            const rot = time * speed;
-            obj.rotation.x = rot;
-            obj.rotation.y = rot;
-        });
+        // objects.forEach((obj, ndx) => {
+        //     const speed = .1 + ndx * .05;
+        //     const rot = time * speed;
+        //     obj.rotation.x = rot;
+        //     obj.rotation.y = rot;
+        // });
 
         renderer.render(scene, camera);
 
@@ -95,6 +110,9 @@ function renderSpiral(fibVal) {
 
     requestAnimationFrame(render);
 }
+
+renderSpiral();
+updateVal(sequence[sequence.length - 1]);
 
 // Set button functions to be part of the window
 window.bigger = bigger;
