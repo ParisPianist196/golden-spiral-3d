@@ -1,4 +1,4 @@
-import * as THREE from './three.module.min.js';
+import * as THREE from './lib/three.module.min.js';
 
 // Camera consts
 const fov = 40;
@@ -10,9 +10,31 @@ const camera_z = 120;
 // Lighting consts
 const color = 0xFFFFFF;
 const intensity = 3;
+let prevNum = 1;
+let curNum = 1;
 
-export default function renderSpiral() {
-    console.log(curNum);
+function bigger() {
+    let nextNum = curNum + prevNum;
+    prevNum = curNum;
+    curNum = nextNum;
+    updateHtmlVal(curNum);
+    renderSpiral(curNum);
+}
+
+function smaller() {
+    let prevPrevNum = curNum - prevNum;
+    curNum = prevNum;
+    prevNum = prevPrevNum;
+    updateHtmlVal(curNum);
+    renderSpiral(curNum);
+}
+
+function updateHtmlVal(val) {
+    document.getElementById("fib_val").innerText = val;
+}
+
+function renderSpiral(fibVal) {
+    console.log(fibVal);
     let objects = [];
 
     const canvas = document.querySelector('#c');
@@ -73,3 +95,7 @@ export default function renderSpiral() {
 
     requestAnimationFrame(render);
 }
+
+// Set button functions to be part of the window
+window.bigger = bigger;
+window.smaller = smaller;
