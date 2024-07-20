@@ -1,7 +1,6 @@
 import * as THREE from './lib/three.module.min.js';
 
 // Colors
-const canvasBg = "#060E0E";
 const lineColor = "#BFDBF7";
 
 // Camera consts
@@ -50,8 +49,8 @@ function createSpiralMesh(scene) {
         const mesh = new THREE.LineSegments(geometry, material);
 
         // Translate by previous number
-        mesh.position.x = fibVal * idx;
-        mesh.position.y = 0;
+        mesh.position.x = 0;
+        mesh.position.y = sequence[idx - 1] + fibVal;
         // mesh.rotation.x = 0.5;
         // mesh.rotation.y = 0.5;
         scene.add(mesh);
@@ -60,7 +59,7 @@ function createSpiralMesh(scene) {
 
 function renderSpiral() {
     const canvas = document.querySelector('#c');
-    const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, canvas, alpha: true });
 
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
     camera.position.z = camera_z;
@@ -69,7 +68,6 @@ function renderSpiral() {
     light.position.set(-1, 2, 4);
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(canvasBg);
     scene.add(camera);
     scene.add(light);
 
