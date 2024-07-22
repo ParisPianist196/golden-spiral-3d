@@ -41,18 +41,26 @@ function updateVal(val) {
 }
 
 function createSpiralMesh(scene) {
-    for (const [idx, fibVal] of sequence.entries()) {
+    let axis = false;
+
+    for (const [idx, fibVal] of sequence.slice(1, sequence.length).entries()) {
         const w = fibVal;
 
         const geometry = new THREE.EdgesGeometry(new THREE.BoxGeometry(w, w, w), 15)
         const material = new THREE.LineBasicMaterial({ color: lineColor });
         const mesh = new THREE.LineSegments(geometry, material);
 
-        // Translate by previous number
-        mesh.position.x = 0;
-        mesh.position.y = sequence[idx - 1] + fibVal;
-        // mesh.rotation.x = 0.5;
-        // mesh.rotation.y = 0.5;
+        // If we need to add next mesh along the x axis, add and update
+        if (axis) {
+            xMax += xAcc + (fibVal * (pos ? -1 : 1));
+            xMin
+            mesh.position.x = xAcc;
+            mesh.position.y = 0;
+        }
+
+        axis = !axis;
+        pos = !pos;
+
         scene.add(mesh);
     }
 }
