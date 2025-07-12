@@ -50,7 +50,7 @@ function createSpiralMesh(scene) {
 
     for (const fibVal of sequence.slice(1)) {
         const geometry = new THREE.BoxGeometry(fibVal, fibVal, fibVal);
-        // geometry.translate(fibVal / 2, fibVal / 2, 0);
+        geometry.translate(fibVal / 2, fibVal / 2, 0);
 
         const material = new THREE.MeshBasicMaterial({ color: lineColor });
         const mesh = new THREE.Mesh(geometry, material);
@@ -75,47 +75,58 @@ function createSpiralMesh(scene) {
 }
 function drawSpiral(scene) {
     let idx = 1
-    let xAcc = 0, yAcc = 0, prevX, prevY
+    let xAcc = 0, yAcc = 0, zAcc = 0, prevX, prevY, prevZ
 
     for (const fibVal of sequence.slice(1)) {
         prevX = xAcc
         prevY = yAcc
+        prevZ = zAcc
 
-        // Update accumulators based on direction
         const dirX = [0, 1].includes(idx) ? 1 : -1;
         const dirY = [1, 2].includes(idx) ? -1 : 1;
         xAcc += fibVal * dirX;
         yAcc += fibVal * dirY;
+        zAcc += fibVal
 
-        const start = new THREE.Vector3(prevX, prevY, 0);
-        const end = new THREE.Vector3(xAcc, yAcc, 0);
+        const start = new THREE.Vector3(prevX, prevY, prevZ);
+        const end = new THREE.Vector3(xAcc, yAcc, zAcc);
 
-        // Compute midpoint
         const midX = (prevX + xAcc) / 2;
         const midY = (prevY + yAcc) / 2;
+        const midZ = (prevZ + zAcc) / 2
 
-        // Offset control point perpendicular to segment
         const dx = xAcc - prevX;
         const dy = yAcc - prevY;
         const len = Math.sqrt(dx * dx + dy * dy);
-        const normX = -dy / len; // rotate 90° clockwise
+        const normX = -dy / len;
         const normY = dx / len;
 
-        const arcHeight = fibVal * 0.5; // controls curvature
+        const arcHeight = fibVal * 0.65;
         const control = new THREE.Vector3(
             midX + normX * arcHeight,
             midY + normY * arcHeight,
-            0
+            midZ
         );
 
-        // Create arc
         const curve = new THREE.QuadraticBezierCurve3(start, control, end);
         const points = curve.getPoints(50);
         const geometry = new THREE.BufferGeometry().setFromPoints(points);
         const material = new THREE.LineBasicMaterial({ color: lineColor });
         const arc = new THREE.Line(geometry, material);
 
+        // Squares
+        const boxGeom = new THREE.BoxGeometry(fibVal, fibVal, fibVal);
+        const wireframe = new THREE.WireframeGeometry(boxGeom);
+        wireframe.translate(midX, midY, midZ);
+        const boxMat = new THREE.MeshBasicMaterial({
+            color: lineColor,
+            wireframe: true
+        });
+
+        const mesh = new THREE.Mesh(wireframe, boxMat);
+
         scene.add(arc);
+        scene.add(mesh)
 
         idx = (idx + 1) % 4;
     }
