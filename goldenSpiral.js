@@ -1,4 +1,5 @@
-import * as THREE from './lib/three.module.min.js';
+import * as THREE from "three"
+import { OrbitControls } from "three/addons/controls/OrbitControls.js"
 
 // Colors
 const lineColor = "#BFDBF7";
@@ -16,6 +17,29 @@ const intensity = 3;
 
 // Fibonacci
 let sequence = [0, 1];
+let scene, camera, renderer, controls;
+
+function init() {
+    const canvas = document.querySelector('#c');
+    renderer = new THREE.WebGLRenderer({ antialias: true, canvas, alpha: true });
+
+    camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+    camera.position.set(0, 0, camera_z);
+    camera.lookAt(0, 0, 0);
+
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+
+    scene = new THREE.Scene();
+
+    const light = new THREE.DirectionalLight(color, intensity);
+    light.position.set(-1, 2, 4);
+    scene.add(light);
+
+    drawSpiral(); // Draw initial spiral
+    animate();
+}
 
 function getCheckedLen() {
     let len = sequence.length;
@@ -26,54 +50,21 @@ function bigger() {
     let len = sequence.length;
     sequence.push(sequence[len - 2] + sequence[len - 1]);
     updateVal(sequence[len - 1]);
-    renderSpiral()
+    render()
 }
 
 function smaller() {
     let len = getCheckedLen();
     sequence.splice(len - 1, 1);
     updateVal(sequence[len - 2]);
-    renderSpiral()
+    render()
 }
 
 function updateVal(val) {
     document.getElementById("fib_val").innerText = val;
 }
 
-function createSpiralMesh(scene) {
-    let pos = false;
-    const axis = ['x', 'y', 'z']
-    let idx = 1
-    let xDelta, yDelta
-
-    let xAcc = 0, yAcc = 0, rotAcc = 0; // accumulators
-
-    for (const fibVal of sequence.slice(1)) {
-        const geometry = new THREE.BoxGeometry(fibVal, fibVal, fibVal);
-        geometry.translate(fibVal / 2, fibVal / 2, 0);
-
-        const material = new THREE.MeshBasicMaterial({ color: lineColor });
-        const mesh = new THREE.Mesh(geometry, material);
-
-        const edges = new THREE.EdgesGeometry(geometry);
-        const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
-        const edgeLines = new THREE.LineSegments(edges, lineMaterial);
-
-        mesh.add(edgeLines);
-
-        xAcc += (fibVal * ([0, 1].includes(idx) ? 1 : -1));
-        yAcc += (fibVal * ([1, 2].includes(idx) ? -1 : 1));
-        rotAcc += Math.PI / 2
-
-        mesh.position.set(xAcc, yAcc, 0);
-        mesh.rotateY(rotAcc)
-        scene.add(mesh);
-        idx += 1
-        if (idx > 3) idx = 0
-    }
-
-}
-function drawSpiral(scene) {
+function drawSpiral() {
     let idx = 1
     let xAcc = 0, yAcc = 0, zAcc = 0, prevX, prevY, prevZ
 
@@ -115,15 +106,11 @@ function drawSpiral(scene) {
         const arc = new THREE.Line(geometry, material);
 
         // Squares
-        const boxGeom = new THREE.BoxGeometry(fibVal, fibVal, fibVal);
-        const wireframe = new THREE.WireframeGeometry(boxGeom);
-        wireframe.translate(midX, midY, midZ);
-        const boxMat = new THREE.MeshBasicMaterial({
-            color: lineColor,
-            wireframe: true
-        });
+        const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(fibVal, fibVal, fibVal), 15)
+        const edgesMat = new THREE.LineBasicMaterial({ color: lineColor });
+        edges.translate(midX, midY, midZ);
 
-        const mesh = new THREE.Mesh(wireframe, boxMat);
+        const mesh = new THREE.LineSegments(edges, edgesMat);
 
         scene.add(arc);
         scene.add(mesh)
@@ -133,54 +120,38 @@ function drawSpiral(scene) {
 }
 
 
-function renderSpiral() {
-    const canvas = document.querySelector('#c');
-    const renderer = new THREE.WebGLRenderer({ antialias: true, canvas, alpha: true });
-
-    const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    camera.position.set(0, 0, camera_z) // zDistance > 0
-    camera.lookAt(0, 0, 0)
-    const light = new THREE.DirectionalLight(color, intensity);
-    light.position.set(-1, 2, 4);
-
-    const scene = new THREE.Scene();
-    scene.add(camera);
-    scene.add(light);
-
-    let objects = drawSpiral(scene);
-
-    function resizeRendererToDisplaySize() {
+function render() {
+    if (resizeRendererToDisplaySize(renderer)) {
         const canvas = renderer.domElement;
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
-        const needResize = canvas.width !== width || canvas.height !== height;
-        if (needResize) {
-            renderer.setSize(width, height, false);
-        }
-
-        return needResize;
+        camera.aspect = canvas.clientWidth / canvas.clientHeight;
+        camera.updateProjectionMatrix();
     }
-
-    function render(time) {
-
-        if (resizeRendererToDisplaySize(renderer)) {
-            const canvas = renderer.domElement;
-            camera.aspect = canvas.clientWidth / canvas.clientHeight;
-            camera.updateProjectionMatrix();
-        }
-
-        renderer.render(scene, camera);
-
-        requestAnimationFrame(render);
-    }
+    controls.update();
+    renderer.render(scene, camera);
 
     requestAnimationFrame(render);
 }
 
-renderSpiral();
+function resizeRendererToDisplaySize() {
+    const canvas = renderer.domElement;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    const needResize = canvas.width !== width || canvas.height !== height;
+    if (needResize) {
+        renderer.setSize(width, height, false);
+    }
+
+    return needResize;
+}
+
+
+function animate() {
+    requestAnimationFrame(render);
+}
+
+init();
 updateVal(sequence[sequence.length - 1]);
 
 // Set button functions to be part of the window
-
 document.getElementById("bigger").addEventListener("click", bigger);
 document.getElementById("smaller").addEventListener("click", smaller);
