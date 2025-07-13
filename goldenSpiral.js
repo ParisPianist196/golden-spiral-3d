@@ -2,7 +2,8 @@ import * as THREE from "three"
 import { OrbitControls } from "three/addons/controls/OrbitControls.js"
 
 // Colors
-const lineColor = "#BFDBF7";
+const lineColor = "#F4E04D";
+const boxColor = "BFDBF7"
 
 // Camera consts
 const fov = 40;
@@ -16,7 +17,7 @@ const color = 0xFFFFFF;
 const intensity = 3;
 
 // Fibonacci
-let sequence = [0, 1];
+let sequence = [0, 1], val = 0;
 let scene, camera, renderer, controls;
 
 function init() {
@@ -30,6 +31,9 @@ function init() {
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
+    controls.minDistance = 10;
+    controls.maxDistance = 1000;
+    controls.update()
 
     scene = new THREE.Scene();
 
@@ -47,17 +51,23 @@ function getCheckedLen() {
 }
 
 function bigger() {
-    let len = sequence.length;
-    sequence.push(sequence[len - 2] + sequence[len - 1]);
-    updateVal(sequence[len - 1]);
-    render()
+    if (val != 144) {
+        let len = sequence.length;
+        sequence.push(sequence[len - 2] + sequence[len - 1]);
+        val = sequence[len - 1]
+        updateVal(val);
+        drawSpiral()
+    }
 }
 
 function smaller() {
-    let len = getCheckedLen();
-    sequence.splice(len - 1, 1);
-    updateVal(sequence[len - 2]);
-    render()
+    if (val != 144) {
+        let len = getCheckedLen();
+        sequence.splice(len - 1, 1);
+        val = sequence[len - 2]
+        updateVal(val);
+        drawSpiral()
+    }
 }
 
 function updateVal(val) {
@@ -65,8 +75,13 @@ function updateVal(val) {
 }
 
 function drawSpiral() {
+    while (scene.children.length > 1) {  // preserve the light
+        scene.remove(scene.children[scene.children.length - 1]);
+    }
+
     let idx = 1
     let xAcc = 0, yAcc = 0, zAcc = 0, prevX, prevY, prevZ
+    console.log(sequence)
 
     for (const fibVal of sequence.slice(1)) {
         prevX = xAcc
@@ -107,7 +122,7 @@ function drawSpiral() {
 
         // Squares
         const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(fibVal, fibVal, fibVal), 15)
-        const edgesMat = new THREE.LineBasicMaterial({ color: lineColor });
+        const edgesMat = new THREE.LineBasicMaterial({ color: boxColor });
         edges.translate(midX, midY, midZ);
 
         const mesh = new THREE.LineSegments(edges, edgesMat);
