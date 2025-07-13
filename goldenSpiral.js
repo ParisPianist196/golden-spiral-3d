@@ -61,13 +61,11 @@ function bigger() {
 }
 
 function smaller() {
-    if (val != 144) {
-        let len = getCheckedLen();
-        sequence.splice(len - 1, 1);
-        val = sequence[len - 2]
-        updateVal(val);
-        drawSpiral()
-    }
+    let len = getCheckedLen();
+    sequence.splice(len - 1, 1);
+    val = sequence[len - 2]
+    updateVal(val);
+    drawSpiral()
 }
 
 function updateVal(val) {
